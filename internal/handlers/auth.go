@@ -3,12 +3,14 @@ package handlers
 import (
 	"Sybersports/internal/models"
 	"Sybersports/internal/service"
+	"context"
 	"net/http"
 )
 
 func Auth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
+	ctx := context.Background()
+ 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method (POST only)", http.StatusMethodNotAllowed)
 		return

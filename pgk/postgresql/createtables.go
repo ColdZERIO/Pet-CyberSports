@@ -14,8 +14,11 @@ func CreateTables(conn *pgx.Conn, ctx context.Context) error {
 		password VARCHAR(200) NOT NUL,
 		fio VARCHAR(60) NOT NULL,
 		email VARCHAR(60),
+		rights INTEGER NOT NULL DEFAULT 1,
 
-		UNIQUE(login)
+		UNIQUE(login);
+
+	CREATE INDEX users_name ON users(fio);
 	)`
 
 	_, err := conn.Exec(ctx, msg)

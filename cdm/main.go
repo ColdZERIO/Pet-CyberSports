@@ -1,9 +1,9 @@
 package main
 
 import (
+	"Sybersports/internal/handlers"
 	"log"
 	"net/http"
-	"school/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
 )
