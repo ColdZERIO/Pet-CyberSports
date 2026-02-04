@@ -3,19 +3,25 @@ package handlers
 import (
 	"Sybersports/internal/models"
 	"Sybersports/internal/service"
-	"encoding/json"
-	"log"
+	"Sybersports/internal/store"
+	postgres "Sybersports/pgk/postgresql"
+	"context"
 	"net/http"
-	"os"
+	"time"
 )
 
 func Registration(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+
+	ctx := r.Context()
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method (POST only)", http.StatusMethodNotAllowed)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 
 	err := r.ParseForm()
 	if err != nil {
@@ -32,21 +38,18 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 	user.Password, err = service.HashPassword(user.Password, service.DefaultParams)
 	if err != nil {
-		panic(err)
+		http.Error(w, "Error with password", http.StatusBadRequest)
 	}
 
-	file, err := os.OpenFile("C:/GO/PracticeGO/base.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0755)
+	conn, err := postgres.CreateConnection(ctx)
 	if err != nil {
-		log.Println("Error read the json file", err)
+		http.Error(w, "Error connection Database", http.StatusBadRequest)
 		return
 	}
-	defer file.Close()
+	err = store.InsertDB(conn, user, ctx)
 
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent(" ", "	")
-	err = encoder.Encode(user)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, "Error add data to Database", http.StatusBadRequest)
 		return
 	}
 

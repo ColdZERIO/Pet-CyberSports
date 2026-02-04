@@ -3,17 +3,25 @@ package postgres
 import (
 	"context"
 	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	ctx := context.Background()
 
-	conn, err := CreateConnection(ctx)
-	if err != nil {
-		panic(err)
+	if err := godotenv.Load(); err != nil {
+		log.Println("Error read .env file")
+		return
 	}
 
-	err = CreateTables(conn, ctx)
+	Conn, err := CreateConnection(ctx)
+	if err != nil {
+		log.Println("Error connection database")
+		return
+	}
+
+	err = CreateTables(Conn, ctx)
 	if err != nil {
 		log.Println("Bad database request")
 		return

@@ -15,8 +15,6 @@ func main() {
 	srv.Post("/registration", handlers.Registration)
 	srv.Post("/auth", handlers.Auth)
 
-	log.Fatal(http.ListenAndServeTLS(":8080", "server.crt", "server.key", srv))
-
 	err := http.ListenAndServe(":8080", srv)
 	if err != nil {
 		log.Println(err)
