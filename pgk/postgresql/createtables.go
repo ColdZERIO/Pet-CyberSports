@@ -2,12 +2,13 @@ package postgres
 
 import (
 	"context"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 )
 
 func CreateTables(conn *pgx.Conn, ctx context.Context) error {
-	msg := `
+	query := `
 	CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
 		login VARCHAR(20) NOT NULL,
@@ -21,6 +22,11 @@ func CreateTables(conn *pgx.Conn, ctx context.Context) error {
 	CREATE INDEX IF NOT EXISTS users_name ON users(fio);
 	`
 
-	_, err := conn.Exec(ctx, msg)
-	return err
+	_, err := conn.Exec(ctx, query)
+	if err != nil {
+		log.Println("Error create tables")
+		return err
+	}
+
+	return nil
 }

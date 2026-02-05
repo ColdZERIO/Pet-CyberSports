@@ -8,22 +8,23 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(".env is not found")
+		return
+	}
+
 	ctx := context.Background()
 
-	if err := godotenv.Load(); err != nil {
-		log.Println("Error read .env file")
+	conn, err := CreateConnection(ctx)
+	if err != nil {
+		log.Fatal("Database connection failed")
 		return
 	}
 
-	Conn, err := CreateConnection(ctx)
+	err = CreateTables(conn, ctx)
 	if err != nil {
-		log.Println("Error connection database")
-		return
-	}
-
-	err = CreateTables(Conn, ctx)
-	if err != nil {
-		log.Println("Bad database request")
+		log.Fatal("Database create failed")
 		return
 	}
 }
