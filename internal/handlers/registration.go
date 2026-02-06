@@ -46,6 +46,8 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error connection Database", http.StatusBadRequest)
 		return
 	}
+	defer conn.Close(ctx)
+	
 	err = store.InsertDB(conn, user, ctx)
 
 	if err != nil {

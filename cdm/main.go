@@ -25,6 +25,7 @@ func main() {
 		log.Fatal("Database connection failed")
 		return
 	}
+	defer conn.Close(ctx)
 
 	err = pkg.CreateTables(conn, ctx)
 	if err != nil {
