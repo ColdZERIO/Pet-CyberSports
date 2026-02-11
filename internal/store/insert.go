@@ -1,13 +1,12 @@
 package store
 
 import (
-	"Sybersports/internal/models"
 	"context"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func InsertDB(db *pgx.Conn, user models.User, ctx context.Context) error {
+func (user User) InsertUser(db *pgx.Conn, ctx context.Context) error {
 	queryMsg := `
 		INSERT INTO users
 		(login, password, fio, email, rights)

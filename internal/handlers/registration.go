@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"Sybersports/internal/models"
 	"Sybersports/internal/service"
 	"Sybersports/internal/store"
 	postgres "Sybersports/pgk/postgresql"
@@ -29,7 +28,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := models.User{
+	user := store.User{
 		Login:    r.FormValue("login"),
 		Password: r.FormValue("password"),
 		FIO:      r.FormValue("fio"),
@@ -47,8 +46,8 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close(ctx)
-	
-	err = store.InsertDB(conn, user, ctx)
+
+	err = store.Postgres.InsertUser(user, conn, ctx)
 
 	if err != nil {
 		http.Error(w, "Error add data to Database", http.StatusBadRequest)
