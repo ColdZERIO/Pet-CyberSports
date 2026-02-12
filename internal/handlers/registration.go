@@ -47,7 +47,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close(ctx)
 
-	err = store.Postgres.InsertUser(user, conn, ctx)
+	err = store.Postgres.InsertUser()
 
 	if err != nil {
 		http.Error(w, "Error add data to Database", http.StatusBadRequest)
