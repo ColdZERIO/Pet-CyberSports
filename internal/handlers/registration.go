@@ -38,6 +38,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 	user.Password, err = service.HashPassword(user.Password, service.DefaultParams)
 	if err != nil {
 		http.Error(w, "Error with password", http.StatusBadRequest)
+		return
 	}
 
 	conn, err := postgres.CreateConnection(ctx)
@@ -47,7 +48,7 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close(ctx)
 
-	err = store.Postgres.InsertUser()
+	err = user.InsertUser(conn, ctx)
 
 	if err != nil {
 		http.Error(w, "Error add data to Database", http.StatusBadRequest)

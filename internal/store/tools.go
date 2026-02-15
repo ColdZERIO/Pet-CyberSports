@@ -14,8 +14,7 @@ func (user User) SelectUser(db *pgx.Conn, ctx context.Context) (User, error) {
 		`
 
 	row := db.QueryRow(ctx, queryMsg, user.Login)
-
-	err := row.Scan(&user.Password)
+	err := row.Scan(&user.Login, &user.Password, &user.FIO, &user.Email, &user.Rights)
 	if err != nil {
 		return user, err
 	}
@@ -36,7 +35,8 @@ func (user User) InsertUser(db *pgx.Conn, ctx context.Context) error {
 		user.Login,
 		user.Password,
 		user.FIO,
-		user.Email, // add params
+		user.Email,
+		user.Rights,
 	)
 
 	if err != nil {
@@ -53,14 +53,7 @@ func (user User) UpdateUser(db *pgx.Conn, ctx context.Context) error {
 	WHERE id = $2;
 	`
 
-	_, err := db.Exec(
-		ctx,
-		queryMsg,
-		user.Login,
-		user.Password,
-		user.FIO,
-		user.Email,
-	)
+	_, err := db.Exec(ctx, queryMsg, user.Rights, user.ID)
 
 	if err != nil {
 		return err
@@ -69,7 +62,7 @@ func (user User) UpdateUser(db *pgx.Conn, ctx context.Context) error {
 	return nil
 }
 
-func (user User) DeleteUser(db *pgx.Conn,ctx context.Context) error {
+func (user User) DeleteUser(db *pgx.Conn, ctx context.Context) error {
 	queryMsg := `
 	DELETE FROM users
 	WHERE id = $1;

@@ -7,6 +7,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+// Сделать SQL-схему (будет правильней)
+
 func CreateTables(conn *pgx.Conn, ctx context.Context) error {
 	query := `
 	CREATE TABLE IF NOT EXISTS users (
