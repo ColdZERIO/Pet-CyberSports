@@ -6,5 +6,5 @@ type User struct {
 	Password string `json:"password" validate:"required,min=6"`
 	FIO      string `json:"fio"`
 	Email    string `json:"email" validate:"required,email"`
-	Rights   int    `json:"isadmin"`
+	Rights   int    `json:"is_admin"`
 }

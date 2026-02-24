@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"Sybersports/internal/service"
-	"Sybersports/internal/store"
-	postgres "Sybersports/pgk/postgresql"
+	"Sybersports/internal/models"
+	service "Sybersports/internal/service/storage"
 	"context"
 	"net/http"
 	"time"
@@ -22,36 +21,11 @@ func Registration(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	err := r.ParseForm()
+	user := &models.User{}
+
+	user, err := service.AddNewUser(r, ctx, user)
 	if err != nil {
-		http.Error(w, "Invalid form", http.StatusBadRequest)
-		return
-	}
-
-	user := store.User{
-		Login:    r.FormValue("login"),
-		Password: r.FormValue("password"),
-		FIO:      r.FormValue("fio"),
-		Email:    r.FormValue("email"),
-	}
-
-	user.Password, err = service.HashPassword(user.Password, service.DefaultParams)
-	if err != nil {
-		http.Error(w, "Error with password", http.StatusBadRequest)
-		return
-	}
-
-	conn, err := postgres.CreateConnection(ctx)
-	if err != nil {
-		http.Error(w, "Error connection Database", http.StatusBadRequest)
-		return
-	}
-	defer conn.Close(ctx)
-
-	err = user.InsertUser(conn, ctx)
-
-	if err != nil {
-		http.Error(w, "Error add data to Database", http.StatusBadRequest)
+		http.Error(w, "Error add user to Database", http.StatusBadRequest)
 		return
 	}
 

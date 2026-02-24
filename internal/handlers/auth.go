@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"Sybersports/internal/models"
-	"Sybersports/internal/service"
+	service "Sybersports/internal/service/secure"
 	"net/http"
 )
 
