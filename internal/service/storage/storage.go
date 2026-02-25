@@ -2,40 +2,67 @@ package service
 
 import (
 	"Sybersports/internal/models"
-	service "Sybersports/internal/service/secure"
-	postgres "Sybersports/pgk/postgresql"
+	"Sybersports/internal/service/secure"
 	"context"
 	"errors"
-	"net/http"
+	"strings"
 )
 
-func AddNewUser(r *http.Request, ctx context.Context, user *models.User) (*models.User, error) {
-	db, err := postgres.CreateConnection(ctx)
-	if err != nil {
-		return nil, errors.New()
+// Надо добавить еще функций согласно интерфейсу
+
+var ErrUserNotFound = errors.New("user not found")
+var ErrInvalidInput = errors.New("invalid input")
+
+type Repository interface {
+	SelectPostgres(ctx context.Context, id int) (models.User, error)
+	InsertPostgres(ctx context.Context, user models.User) (models.User, error)
+	UpdatePostgres(ctx context.Context, user models.User) (models.User, error)
+	DeletePostgres(ctx context.Context, id int) error
+	// CheckUserPostgres(ctx context.Context, user models.User) error
+}
+
+type Service struct {
+	repo Repository
+}
+
+func NewService(repo Repository) *Service {
+	return &Service{repo: repo}
+}
+
+func (s *Service) CreateUser(ctx context.Context, user models.User) (models.User, error) {
+	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
+	user.Login = strings.TrimSpace(user.Login)
+
+	if user.Email == "" || user.Login == "" {
+		return models.User{}, ErrInvalidInput
 	}
 
-	err = r.ParseForm()
-	if err != nil {
-		return nil, errors.New("cant parse user form")
+	// err := s.repo.CheckUserPostgres(ctx, user)
+	// if err != nil {
+	// 	return models.User{}, errors.New("user with login or email already exists")
+	// }
+
+	newUser := models.User{
+		Login:    user.Login,
+		Password: user.Password,
+		FIO:      user.FIO,
+		Email:    user.Email,
 	}
 
-	login := r.FormValue("login")
-	password := r.FormValue("password")
-	fio := r.FormValue("fio")
-	email := r.FormValue("email")
-
-	password, err = service.HashPassword(user.Password, service.DefaultParams)
+	pass, err := secure.HashPassword(user.Password, secure.DefaultParams)
 	if err != nil {
-		return nil, errors.New("problems with hash password")
+		return models.User{}, errors.New("cant hash password")
 	}
 
-	user.Login = login
-	user.Password = password
-	user.FIO = fio
-	user.Email = email
+	newUser.Password = pass
 
+	return s.repo.InsertPostgres(ctx, newUser)
+}
 
+func (s *Service) GetUser(ctx context.Context, id int) (models.User, error) {
+	if id <= 0 {
+		return models.User{}, ErrInvalidInput
+	}
 
-	return user, nil
+	return s.repo.SelectPostgres(ctx, id)
 }

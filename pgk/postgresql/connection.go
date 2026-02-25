@@ -18,6 +18,7 @@ func CreateConnection(ctx context.Context) (*pgx.Conn, error) {
 
 	msgConn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, dbname)
 	log.Println(msgConn)
+
 	return pgx.Connect(ctx, msgConn)
 }
 
@@ -26,4 +27,28 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func CreateTables(conn *pgx.Conn, ctx context.Context) error {
+	query := `
+	CREATE TABLE IF NOT EXISTS users (
+		id SERIAL PRIMARY KEY,
+		login VARCHAR(20) NOT NULL,
+		password VARCHAR(200) NOT NULL,
+		fio VARCHAR(60) NOT NULL,
+		email VARCHAR(60),
+		rights INTEGER NOT NULL DEFAULT 1,
+		UNIQUE(login)
+	);
+	
+	CREATE INDEX IF NOT EXISTS users_name ON users(fio);
+	`
+
+	_, err := conn.Exec(ctx, query)
+	if err != nil {
+		log.Println("Error create tables")
+		return err
+	}
+
+	return nil
 }

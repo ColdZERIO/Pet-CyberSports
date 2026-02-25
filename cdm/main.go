@@ -2,10 +2,14 @@ package main
 
 import (
 	"Sybersports/internal/handlers"
-	pkg "Sybersports/pgk/postgresql"
+	"Sybersports/internal/repository"
+	service "Sybersports/internal/service/storage"
 	"context"
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -19,30 +23,39 @@ func main() {
 	}
 
 	ctx := context.Background()
+	defer ctx.Done()
 
-	conn, err := pkg.CreateConnection(ctx)
-	if err != nil {
-		log.Fatal("Database connection failed")
-		return
-	}
-	defer conn.Close(ctx)
+	host := getEnv("DB_HOST", "")
+	port := getEnv("DB_PORT", "")
+	user := getEnv("DB_USER", "")
+	password := getEnv("DB_PASSWORD", "")
+	dbname := getEnv("DB_NAME", "")
 
-	err = pkg.CreateTables(conn, ctx)
+	msgConn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, dbname)
+	db, err := sql.Open("postgres", msgConn)
 	if err != nil {
-		log.Fatal("Database create failed")
-		return
+		log.Fatal(err)
 	}
+	defer db.Close()
+
+	repo := repository.NewRepository(db)
+	svc := service.NewService(repo)
+	hand := handlers.NewHandler(svc)
 
 	srv := chi.NewRouter()
-	log.Println("Srever START")
-
-	srv.Post("/registration", handlers.Registration)
-	srv.Post("/auth", handlers.Auth)
+	srv.Post("/reg", hand.RegistrationUser)
+	log.Println("Server START")
 
 	err = http.ListenAndServe(":8080", srv)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
-	log.Println("Server STOP")
+}
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
