@@ -114,18 +114,3 @@ func (r *Repository) DeletePostgres(ctx context.Context, id int) error {
 
 	return nil
 }
-
-// CheckUserPostgres returns an error if a user with the same login or email already exists.
-// It implements the service.Repository interface requirement.
-func (r *Repository) CheckUserPostgres(ctx context.Context, user models.User) error {
-	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM users WHERE login=$1 OR email=$2)`
-	err := r.db.QueryRowContext(ctx, query, user.Login, user.Email).Scan(&exists)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return errors.New("user already exists")
-	}
-	return nil
-}

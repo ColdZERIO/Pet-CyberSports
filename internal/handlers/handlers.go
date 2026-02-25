@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"Sybersports/internal/models"
+	"Sybersports/internal/service/secure"
 	"context"
 	"encoding/json"
 	"errors"
@@ -48,4 +49,22 @@ func (h *Handler) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(u)
+}
+
+func Auth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method (POST only)", http.StatusMethodNotAllowed)
+		return
+	}
+
+	user := models.User{}
+
+	user.Login = r.FormValue("login")
+	user.Password = r.FormValue("password")
+
+	secure.VerifyPassword(user.Password, "")
+
+	w.Write([]byte("Well CAM!"))
 }
