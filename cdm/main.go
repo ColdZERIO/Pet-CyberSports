@@ -13,6 +13,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 )
 
@@ -33,7 +34,7 @@ func main() {
 	dbname := getEnv("DB_NAME", "")
 
 	msgConn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, dbname)
-	db, err := sql.Open("postgres", msgConn)
+	db, err := sql.Open("pgx", msgConn)
 	if err != nil {
 		log.Fatal(err)
 	}
