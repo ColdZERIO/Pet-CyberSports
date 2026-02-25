@@ -4,6 +4,7 @@ import (
 	"Sybersports/internal/handlers"
 	"Sybersports/internal/repository"
 	service "Sybersports/internal/service/storage"
+	postgres "Sybersports/pgk/postgresql"
 	"context"
 	"database/sql"
 	"fmt"
@@ -37,6 +38,17 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
+	// Временно
+	conn, err := postgres.CreateConnection(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = postgres.CreateTables(conn, ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	repo := repository.NewRepository(db)
 	svc := service.NewService(repo)

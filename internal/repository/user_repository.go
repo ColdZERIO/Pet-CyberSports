@@ -36,6 +36,23 @@ func (r *Repository) SelectPostgres(ctx context.Context, id int) (models.User, e
 	return user, nil
 }
 
+func (r *Repository) CheckUserPostgres(ctx context.Context, user models.User) error {
+	queryMsg := `
+	SELECT login, email
+	FROM users
+	WHERE login = $1`
+
+	row := r.db.QueryRowContext(ctx, queryMsg, user.Login)
+	err := row.Scan(&user.Login, &user.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return service.ErrUserNotFound
+		}
+		return err
+	}
+	return nil
+}
+
 func (r *Repository) InsertPostgres(ctx context.Context, user models.User) (models.User, error) {
 	queryMsg := `
 		INSERT INTO users

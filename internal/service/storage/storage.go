@@ -18,7 +18,7 @@ type Repository interface {
 	InsertPostgres(ctx context.Context, user models.User) (models.User, error)
 	UpdatePostgres(ctx context.Context, user models.User) (models.User, error)
 	DeletePostgres(ctx context.Context, id int) error
-	// CheckUserPostgres(ctx context.Context, user models.User) error
+	CheckUserPostgres(ctx context.Context, user models.User) error
 }
 
 type Service struct {
@@ -37,10 +37,10 @@ func (s *Service) CreateUser(ctx context.Context, user models.User) (models.User
 		return models.User{}, ErrInvalidInput
 	}
 
-	// err := s.repo.CheckUserPostgres(ctx, user)
-	// if err != nil {
-	// 	return models.User{}, errors.New("user with login or email already exists")
-	// }
+	err := s.repo.CheckUserPostgres(ctx, user)
+	if err != nil {
+		return models.User{}, errors.New("user with login or email already exists")
+	}
 
 	newUser := models.User{
 		Login:    user.Login,
