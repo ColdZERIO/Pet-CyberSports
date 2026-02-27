@@ -1,8 +1,10 @@
 package secure
 
 import (
+	"fmt"
 	"log"
 	"testing"
+	"time"
 )
 
 func TestHashPassword(t *testing.T) {
@@ -17,6 +19,7 @@ func TestHashPassword(t *testing.T) {
 		{name: "Super hard pass", password: "njk421-bnjvf#5321-fbhb34b-njcu!^"},
 	}
 
+	timer := time.Now()
 	for i, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			DefaultParams := ArgonParams{
@@ -33,4 +36,5 @@ func TestHashPassword(t *testing.T) {
 			log.Printf("Test №%d - %s\n", i, res)
 		})
 	}
+	fmt.Println(time.Since(timer))
 }

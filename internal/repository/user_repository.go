@@ -25,7 +25,7 @@ func (r *Repository) SelectPostgres(ctx context.Context, id int) (models.User, e
 		WHERE login = $1;
 		`
 
-	row := r.db.QueryRowContext(ctx, queryMsg, user.Login)
+	row := r.db.QueryRowContext(ctx, queryMsg, id)
 	err := row.Scan(&user.Login, &user.Password, &user.FIO, &user.Email, &user.Rights)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

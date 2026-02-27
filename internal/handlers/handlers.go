@@ -51,7 +51,7 @@ func (h *Handler) RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(u)
 }
 
-func Auth(w http.ResponseWriter, r *http.Request) {
+func AuthUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != http.MethodPost {
@@ -65,6 +65,6 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	user.Password = r.FormValue("password")
 
 	secure.VerifyPassword(user.Password, "")
-
+	
 	w.Write([]byte("Well CAM!"))
 }
